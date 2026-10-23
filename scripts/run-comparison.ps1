@@ -19,7 +19,7 @@ if ($LASTEXITCODE -ne 0) {
     throw "Docker is not running or is not ready. Start Docker Desktop and try again."
 }
 
-$TestFile = Join-Path $SourcePath "Zend	estsoom_after_main_script.phpt"
+$TestFile = Join-Path (Join-Path (Join-Path $SourcePath "Zend") "tests") "oom_after_main_script.phpt"
 $RunnerFile = Join-Path $SourcePath "run-tests.php"
 
 if (-not (Test-Path $TestFile)) {
