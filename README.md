@@ -66,26 +66,19 @@ The final command should return `True`. If the extracted folder has a different 
 
 ### 2. Run the same test against both PHP versions
 
-Run this from the project directory. It creates a results folder for each version and saves the complete console output:
+The repository includes a reusable PowerShell script at [`scripts/run-comparison.ps1`](scripts/run-comparison.ps1). From the project root, run:
 
 ```powershell
-foreach ($version in @("8.3.35", "8.3.36")) {
-    $outDir = Join-Path $PWD "results-$version"
-    New-Item -ItemType Directory -Force -Path $outDir | Out-Null
-
-    docker run --rm `
-      --mount "type=bind,source=$src,target=/src" `
-      -w /src `
-      "php:$version-cli" `
-      php /src/run-tests.php `
-        --show-diff `
-        --keep-all `
-        Zend/tests/oom_after_main_script.phpt `
-      2>&1 | Tee-Object (Join-Path $outDir "console-output.txt")
-}
+.\scripts\run-comparison.ps1
 ```
 
-Docker downloads the PHP CLI images if they are not already present. The command uses disposable containers; the test source tree is mounted so PHP's test runner can create its temporary files. `--show-diff` prints the mismatch for a failing run, and `--keep-all` retains test artifacts for inspection.
+By default, the script expects the extracted source folder `php-src-php-8.3.36` in the project root. If your source is somewhere else, pass its path:
+
+```powershell
+.\scripts\run-comparison.ps1 -SourcePath "C:\path\to\php-src-php-8.3.36"
+```
+
+The script checks that Docker is running and that the upstream test and test runner exist, then runs the same test in disposable `php:8.3.35-cli` and `php:8.3.36-cli` containers. It saves the full console output to `results-8.3.35/console-output.txt` and `results-8.3.36/console-output.txt`. Docker downloads the images if they are not already present. The test uses `--show-diff` to show output mismatches and `--keep-all` to retain test artifacts.
 
 ### 3. Review the evidence
 
